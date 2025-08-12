@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>{{ job.title }}</h2>
+  <p><strong>Category:</strong> {{ job.job_category }}</p>
+  <p><strong>Location:</strong> {{ job.location }}</p>
+  <p><strong>Description:</strong></p>
+  <p>{{ job.description }}</p>
+  <p><strong>Status:</strong> {{ job.status }}</p>
+
+  {% if user.is_authenticated and job.assigned_to == user and job.status == 'ASSIGNED' %}
+    <a href="{% url 'complete_job' job.pk %}">Mark as Complete</a>
+  {% endif %}
+
+  <hr>
+
+  {% if user.is_authenticated %}
+    {% if user.role == 'CUSTOMER' and job.posted_by == user %}
+      <h3>Quotes Received</h3>
+      {% for quote in job.quotes.all %}
+        <div>
+          <p><strong>From:</strong> {{ quote.artisan.full_name }}</p>
+          <p><strong>Amount:</strong> ${{ quote.amount }}</p>
+          <p><strong>Message:</strong> {{ quote.message }}</p>
+          {% if quote.status == 'PENDING' %}
+            <a href="{% url 'accept_quote' quote.pk %}">Accept Quote</a>
+          {% elif quote.status == 'ACCEPTED' %}
+            <strong>Quote Accepted</strong>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>No quotes received yet.</p>
+      {% endfor %}
+    {% elif user.role == 'ARTISAN' and job.status == 'OPEN' %}
+      <h3>Submit a Quote</h3>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="quote">
+        {{ quote_form.as_p }}
+        <button type="submit">Submit Quote</button>
+      </form>
+    {% endif %}
+
+    {% if user.role == 'CUSTOMER' and job.posted_by == user and job.status == 'COMPLETED' %}
+      {% if job.review %}
+        <h3>Your Review</h3>
+        <p>Rating: {{ job.review.rating }}/5</p>
+        <p>{{ job.review.comment }}</p>
+      {% else %}
+        <h3>Leave a Review</h3>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="review">
+          {{ review_form.as_p }}
+          <button type="submit">Submit Review</button>
+        </form>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endblock %}

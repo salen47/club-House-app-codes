@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Artisan Profile</h2>
+  {% if profile.user.profile_picture %}
+  <img src="{{ profile.user.profile_picture.url }}" alt="{{ profile.user.full_name }}'s profile picture" width="100">
+  {% endif %}
+  <h3>{{ profile.user.full_name }} {% if profile.is_verified %}(Verified){% endif %}</h3>
+  <p><strong>Service:</strong> {{ profile.get_service_category_display }}</p>
+  <p><strong>Location:</strong> {{ profile.user.location }}</p>
+  <p><strong>Rating:</strong> {{ profile.average_rating|floatformat:1 }} ({{ profile.number_of_jobs }} jobs completed)</p>
+
+  <h4>About Me</h4>
+  <p>{{ profile.bio }}</p>
+
+  <h4>Portfolio</h4>
+  <div>
+    {% for image in profile.portfolio_images.all %}
+      <img src="{{ image.image.url }}" alt="Portfolio image" width="200">
+    {% empty %}
+      <p>No portfolio images yet.</p>
+    {% endfor %}
+  </div>
+
+  <h4>Reviews</h4>
+  <div>
+    {% for review in profile.user.received_reviews.all %}
+      <div>
+        <p><strong>{{ review.customer.full_name }}</strong> - {{ review.rating }}/5</p>
+        <p>{{ review.comment }}</p>
+      </div>
+    {% empty %}
+      <p>No reviews yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

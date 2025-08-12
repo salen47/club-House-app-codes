@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>New Job Opportunities</h2>
+  <ul>
+    {% for job in jobs %}
+      <li><a href="{% url 'job_detail' job.pk %}">{{ job.title }}</a> in {{ job.location }}</li>
+    {% empty %}
+      <li>No jobs match your service category at the moment.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
